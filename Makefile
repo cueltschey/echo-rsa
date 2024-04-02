@@ -5,13 +5,25 @@ BINDIR=build
 SRCDIR=src
 INCDIR=src/include
 
-$(BINDIR)/$(TARGET):
-	$(CC) -I$(INCDIR) $(SRCDIR)/*.c -o $(BINDIR)/$(TARGET) $(FLAGS)
+# Define object files
+OBJ=$(BINDIR)/encryption.o $(BINDIR)/main.o
+
+# Rule to build the target executable
+$(BINDIR)/$(TARGET): $(OBJ)
+	$(CC) -o $@ $(OBJ) $(FLAGS)
+
+# Rule to compile the encryption module
+$(BINDIR)/encryption.o: $(INCDIR)/encryption.c $(INCDIR)/encryption.h
+	$(CC) -c -o $@ $(INCDIR)/encryption.c -I$(INCDIR) $(FLAGS)
+
+# Rule to compile the main module
+$(BINDIR)/main.o: $(SRCDIR)/main.c $(INCDIR)/encryption.h
+	$(CC) -c -o $@ $(SRCDIR)/main.c -I$(INCDIR) $(FLAGS)
 
 install: $(BINDIR)/$(TARGET)
 	cp $(BINDIR)/$(TARGET) /usr/local/bin
 
 clean:
-	rm -f $(SRCDIR)/*.o $(INCDIR)/*.o
+	rm -f $(BINDIR)/*.o
 	rm -f $(BINDIR)/$(TARGET)
 	rm -f /usr/local/bin/$(TARGET)
